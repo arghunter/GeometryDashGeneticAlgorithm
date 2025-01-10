@@ -58,6 +58,14 @@ e.g.
 color = lambda: tuple([random.randint(0, 255) for i in range(3)])  # lambda function for random color, not a constant.
 GRAVITY = Vector2(0, 0.86)  # Vector2 is a pygame
 
+
+population_size=50
+currLength=1
+time_inc=100
+genomes = np.random.rand((population_size,currLength))*time_inc
+
+
+
 """
 Main player class
 """
