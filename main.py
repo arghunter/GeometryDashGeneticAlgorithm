@@ -59,11 +59,19 @@ color = lambda: tuple([random.randint(0, 255) for i in range(3)])  # lambda func
 GRAVITY = Vector2(0, 0.86)  # Vector2 is a pygame
 
 
-population_size=50
-currLength=1
-time_inc=100
-genomes = np.random.rand((population_size,currLength))*time_inc
-
+population_size=25
+currLength=10
+time_inc=50
+max_time=200
+genomes = (np.random.rand(population_size,currLength)*max_time).astype(int)
+scores= np.zeros(population_size)
+elitism=int(0.1*population_size)
+elite_carry=0.6
+for i in range(population_size):
+    genomes[i]=np.sort(genomes[i])
+print(genomes)
+currEpoch=0
+currGenome=0
 
 
 """
@@ -168,7 +176,7 @@ class Player(pygame.sprite.Sprite):
     def update(self):
         """update player"""
         self.counter+=1
-        print(self.counter)
+        # print(self.counter)
         if self.isjump:
             if self.onGround:
                 """if player wants to jump and player is on the ground: only then is jump allowed"""
@@ -381,8 +389,8 @@ def death_screen():
     screen.fill(pygame.Color("sienna1"))
     screen.blits([[game_over, (100, 100)], [tip, (100, 400)]])
 
-    wait_for_key()
-    reset()
+    # wait_for_key()
+    reset(genomes[currGenome])
 
 
 def eval_outcome(won: bool, died: bool):
@@ -425,21 +433,80 @@ def start_screen():
         level_memo = font.render(f"Level {level + 1}.", True, (255, 255, 0))
         screen.blit(level_memo, (100, 200))
 
+def reproduce():
+    global currGenome, scores, population_size,genomes, elitism, elite_carry, max_time,time_inc
 
+    max_time+=time_inc
+    sorted_genomes = np.copy(genomes[np.argsort(scores)])
+    scores=np.sort(scores)
+    print(scores)
+    genomes=np.zeros((genomes.shape[0],genomes.shape[1]+1))
+    iter=0
+    for i in range(int(elite_carry*population_size)):
+        p1=sorted_genomes[np.random.randint(len(sorted_genomes)-elitism, len(sorted_genomes))]
+        p2=sorted_genomes[np.random.randint(len(sorted_genomes)-elitism, len(sorted_genomes))]
+        
+        child = ((p1+p2)/2).astype(int)
+        child= np.append(child,np.random.randint(max(sorted_genomes[i])+time_inc))
+        # print(scores)
+        if(np.random.rand()>0.16):
+            child[np.random.randint(len(child))]+=np.random.randint(-5,5)
+        genomes[i]=child
+      
+        iter=i
+    for i in range(iter+1,population_size-int(elitism)):
+        p1=sorted_genomes[np.random.randint(0, len(sorted_genomes))]
+        p2=sorted_genomes[np.random.randint(0, len(sorted_genomes))]
+        child = ((p1+p2)/2).astype(int)
+        child= np.append(child, np.random.randint(max(sorted_genomes[i])+time_inc))
+        genomes[i]=child
+    for i in range(population_size-int(elitism),population_size):
+        # print(scores[i])
+        genomes[i]=np.append(sorted_genomes[i], np.random.randint(max(sorted_genomes[i])+time_inc))
+        
+    for i in range(population_size):
+        genomes[i]=np.sort(genomes[i])
+
+    # print(genomes)
+    
+    
+        
+    
+    
 def reset():
     """resets the sprite groups, music, etc. for death and new level"""
     global player, elements, player_sprite, level
 
     if level == 1:
         pygame.mixer.music.load(os.path.join("music", "castle-town.mp3"))
-    pygame.mixer_music.play()
+    # pygame.mixer_music.play()
     player_sprite = pygame.sprite.Group()
     elements = pygame.sprite.Group()
-    player = Bot(avatar, elements, (150, 150), player_sprite, jumps= np.array([50]))
+    player = Player(avatar, elements, (150, 150), player_sprite)
     init_level(
             block_map(
                     level_num=levels[level]))
 
+def reset(jumps):
+    """resets the sprite groups, music, etc. for death and new level"""
+    global player, elements, player_sprite, level, currGenome, scores, population_size
+    scores[currGenome]=player.counter
+    currGenome+=1
+    if currGenome>=population_size:
+        
+        print(scores)
+        reproduce()
+       
+        currGenome=0
+    # if level == 1:
+    #     pygame.mixer.music.load(os.path.join("music", "castle-town.mp3"))
+    # pygame.mixer_music.play()
+    player_sprite = pygame.sprite.Group()
+    elements = pygame.sprite.Group()
+    player = Bot(avatar, elements, (150, 150), player_sprite,jumps=jumps)
+    init_level(
+            block_map(
+                    level_num=levels[level]))
 
 def move_map():
     """moves obstacles along the screen"""
@@ -570,8 +637,8 @@ pygame.display.set_caption('Pydash: Geometry Dash in Python')
 text = font.render('image', False, (255, 255, 0))
 
 # music
-music = pygame.mixer_music.load(os.path.join("music", "bossfight-Vextron.mp3"))
-pygame.mixer_music.play()
+# music = pygame.mixer_music.load(os.path.join("music", "bossfight-Vextron.mp3"))
+# pygame.mixer_music.play()
 
 # bg image
 bg = pygame.image.load(os.path.join("images", "bg.png"))
@@ -587,7 +654,7 @@ while not done:
 
     if not start:
         wait_for_key()
-        reset()
+        reset(genomes[currGenome])
 
         start = True
 
@@ -596,7 +663,7 @@ while not done:
     eval_outcome(player.win, player.died)
     #TODO: Insert bot step here like the get move 
     if keys[pygame.K_UP] or keys[pygame.K_SPACE] or player.should_jump():
-        print("Here")
+        # print("Here")
         player.isjump = True
 
     # Reduce the alpha of all pixels on this surface each frame.
@@ -641,5 +708,5 @@ while not done:
                 player.jump_amount -= 1
 
     pygame.display.flip()
-    clock.tick(60)# so this is how i adjust speed
+    clock.tick(1000)# so this is how i adjust speed
 pygame.quit()
