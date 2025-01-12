@@ -1,7 +1,8 @@
 # Pydash
 ## Pygame geometry dash with genetic algorithm solver
 
-Genetic Algorithm and modifications by Armaan Gomes
+Genetic Algorithm and modifications by Armaan Gomes.
+
 Geometry Dash Base Code by Yonah Aviv https://github.com/y330/Pydash
 
 
