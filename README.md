@@ -1,11 +1,12 @@
 # Pydash
-## Pygame geometry dash
- 
-_Code by Yonah Aviv_
+## Pygame geometry dash with genetic algorithm solver
+
+Genetic Algorithm and modifications by Armaan Gomes
+Geometry Dash Base Code by Yonah Aviv https://github.com/y330/Pydash
 
 
 ## Overview
-Implementation of Geometry Dash in Python 3.9 with the interactive graphics library for python, Pygame(v2.0+).
+Implementation of Geometry Dash in Python 3.9+ with the interactive graphics library for python, Pygame(v2.0+).
 
 
 ![](https://lh3.googleusercontent.com/pw/ACtC-3fqOHMkopBQlUqSF5vjhTCL73Dp092W9VSn0QIsvJ76e-jnlT7qEkdvSpGGHHjWSg8o2cHZblSCloO9XM159oEuGqelm-PfNrs-c4bfwA9q2Seb53tGetuNUrxeRPYsDKLeBhwARyVINvZ0MMTsg-lnVQ=w796-h596-no?authuser=0)
